@@ -1,57 +1,89 @@
-# comparison_train_model.py
-
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
-# Load dataset
-df = pd.read_csv("data/processed_dataset.csv")  # Your actual dataset path
+# === Load preprocessed dataset ===
+data_path = "data/processed_dataset.csv"
+df = pd.read_csv(data_path)
 
-# Features and target
+# === Separate features and target ===
 X = df.drop(['Class', 'ID'], axis=1)
 y = df['Class']
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+# === Set test size ===
+test_size = 0.2
 
-# Classifiers to compare
-classifiers = {
-    'Random Forest': RandomForestClassifier(random_state=42),
-    'KNN': KNeighborsClassifier(),
-    'SVM': SVC(probability=True, random_state=42)
+# === Train-test split ===
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
+
+# === Feature scaling ===
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# === Define classifiers ===
+classifiers_to_run = {
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "Support Vector Machine (SVC)": SVC(),
+    "K-Nearest Neighbors": KNeighborsClassifier()
 }
 
-results_summary = []
-
-# Train and evaluate
-for name, clf in classifiers.items():
-    print(f"\nTraining {name}...")
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
+# === Train and evaluate ===
+results_subset = {}
+for name, clf in classifiers_to_run.items():
+    print(f"\n🔄 Training {name} with test_size={test_size}...")
+    clf.fit(X_train_scaled, y_train)
+    y_pred = clf.predict(X_test_scaled)
 
     accuracy = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred)
-    cm = confusion_matrix(y_test, y_pred)
+    confusion = confusion_matrix(y_test, y_pred)
 
-    print(f"\n--- {name} Results ---")
-    print(f"Accuracy: {accuracy:.4f}")
-    print("Classification Report:")
+    results_subset[name] = {
+        "Accuracy": accuracy,
+        "Classification Report": report,
+        "Confusion Matrix": confusion
+    }
+
+    print(f"✅ Accuracy: {accuracy:.4f}")
+    print("📋 Classification Report:")
     print(report)
-    print("Confusion Matrix:")
-    print(cm)
+    print("📊 Confusion Matrix:")
+    print(confusion)
 
-    # Collect results
-    results_summary.append(f"\n--- {name} ---\nAccuracy: {accuracy:.4f}\n")
-    results_summary.append("Classification Report:\n" + report)
-    results_summary.append("Confusion Matrix:\n" + str(cm) + "\n")
+# === Summary table ===
+print("\n--- 📊 Selected Classifier Accuracy Summary ---")
+table_data = [['Classifier', f'Accuracy (test_size={test_size})']]
+for name, result in results_subset.items():
+    table_data.append([name, f"{result['Accuracy']:.4f}"])
+
+df_results = pd.DataFrame(table_data[1:], columns=table_data[0])
+print(df_results.to_markdown(index=False))
 
 # Save evaluation results
-with open("model_comparison_report.txt", "w") as f:
-    f.writelines(results_summary)
+report_path = "model_comparison_report.txt"
+with open(report_path, "w", encoding="utf-8") as f:
+    f.write(f"Model Comparison Report (test_size={test_size})\n")
+    f.write("=" * 50 + "\n\n")
 
-print("\n✅ Model comparison complete. Results saved to model_comparison_report.txt.")
+    for name, result in results_subset.items():
+        f.write(f"{name}\n")
+        f.write(f"Accuracy: {result['Accuracy']:.4f}\n\n")
+        f.write("Classification Report:\n")
+        f.write(result["Classification Report"] + "\n")
+        f.write("Confusion Matrix:\n")
+        f.write(str(result["Confusion Matrix"]) + "\n")
+        f.write("\n" + "-" * 50 + "\n\n")
+
+    # Plain summary table
+    f.write("Accuracy Summary Table:\n")
+    f.write("{:<35} {:>10}\n".format("Classifier", f"Accuracy"))
+    f.write("-" * 50 + "\n")
+    for clf_name, result in results_subset.items():
+        f.write("{:<35} {:>10.4f}\n".format(clf_name, result["Accuracy"]))
+
+print(f"✅ Model comparison report saved to {report_path}")
