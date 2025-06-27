@@ -10,6 +10,16 @@ import plotly.express as px
 import plotly.graph_objects as go
 import requests
 
+# Set wide layout and prevent sidebar from collapsing
+st.set_page_config(page_title="Student Performance Dashboard", layout="wide")
+st.markdown("""
+    <style>
+        [data-testid="collapsedControl"] {
+            display: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Load data
 @st.cache_data
 def load_data():
