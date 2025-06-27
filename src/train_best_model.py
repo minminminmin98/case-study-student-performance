@@ -18,16 +18,16 @@ def train_and_evaluate():
 
     # Split the data
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=42, stratify=y
+        X, y, test_size=0.2, random_state=42
     )
 
     # Best hyperparameters from tuning
     best_rf = RandomForestClassifier(
-        bootstrap=False,
-        max_depth=10,
-        min_samples_leaf=2,
-        min_samples_split=10,
-        n_estimators=100,
+        bootstrap=True,
+        max_depth=None,
+        min_samples_leaf=1,
+        min_samples_split=2,
+        n_estimators=300,
         random_state=42
     )
 
@@ -53,6 +53,15 @@ def train_and_evaluate():
     print(report)
     print("Confusion Matrix:")
     print(conf_matrix)
+
+    # Save results to a text file
+    with open("best_model_results.txt", "w", encoding="utf-8") as f:
+        f.write("📊 Evaluation on Test Set:\n")
+        f.write(f"Accuracy: {accuracy:.4f}\n\n")
+        f.write("Classification Report:\n")
+        f.write(report + "\n")
+        f.write("Confusion Matrix:\n")
+        f.write(str(conf_matrix))
 
     return accuracy  # Return for test assertion
 
