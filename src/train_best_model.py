@@ -12,8 +12,11 @@ def train_and_evaluate():
     # Load the processed dataset
     df = pd.read_csv("data/processed_dataset.csv")
 
-    # Separate features and target
-    X = df.drop(['Class', 'ID'], axis=1)
+    # === Define the features to include (behavioral only) ===
+    features_to_include = ['VisITedResources', 'raisedhands', 'AnnouncementsView', 'StudentAbsenceDays', 'Discussion']
+
+    # === Separate features and target ===
+    X = df[features_to_include]
     y = df['Class']
 
     # Split the data
