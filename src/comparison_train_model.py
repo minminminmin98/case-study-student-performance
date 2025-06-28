@@ -10,9 +10,13 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 data_path = "data/processed_dataset.csv"
 df = pd.read_csv(data_path)
 
+# === Define the features to include (behavioral only) ===
+features_to_include = ['VisITedResources', 'raisedhands', 'AnnouncementsView', 'StudentAbsenceDays', 'Discussion']
+
 # === Separate features and target ===
-X = df.drop(['Class', 'ID'], axis=1)
+X = df[features_to_include]
 y = df['Class']
+
 
 # === Set test size ===
 test_size = 0.2
