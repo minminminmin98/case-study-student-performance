@@ -233,8 +233,43 @@ with st.container():
 
 
 # ------------------------------- Table
-st.subheader("📋 Student Data")
-# Exclude unwanted columns
-excluded_columns = ['ID', 'PlaceofBirth', 'StageID', 'SectionID']
+st.subheader("🚩 At-Risk Student Records")
+
+# Step 1: Define engagement features and calculate low engagement count
+engagement_cols = ['Discussion', 'raisedhands', 'VisITedResources', 'AnnouncementsView']
+low_engagement_flags = sum((filtered_df[col] < filtered_df[col].mean()).astype(int) for col in engagement_cols)
+
+# Step 2: Apply AtRisk condition
+filtered_df = filtered_df.copy()
+filtered_df['AtRisk'] = (
+    (low_engagement_flags >= 2) &
+    (filtered_df['StudentAbsenceDays'] == 'Above-7') &
+    (filtered_df['Class'] == 'L')
+)
+
+# Step 3: Display AtRisk stats
+total_students = len(filtered_df)
+total_at_risk = filtered_df['AtRisk'].sum()
+percent_at_risk = (total_at_risk / total_students) * 100
+st.info(f"🎯 {total_at_risk} out of {total_students} students are flagged as **at risk** ({percent_at_risk:.1f}%).")
+
+# Step 4: Clean up columns for display
+excluded_columns = ['ID', 'PlaceofBirth', 'StageID', 'SectionID', 
+                    'ParentAnsweringSurvey', 'Relation', 'ParentschoolSatisfaction']
 display_df = filtered_df.drop(columns=excluded_columns, errors='ignore')
-st.dataframe(display_df, use_container_width=True, height=300)
+
+# Step 5: Display DataFrame with red highlight for at-risk students
+st.dataframe(
+    display_df.style.applymap(
+        lambda val: 'background-color: salmon' if val is True else '',
+        subset=['AtRisk']
+    ),
+    use_container_width=True,
+    height=350
+)
+
+st.info(
+    "🧠 **At-Risk Criteria**: A student is flagged as *at risk* if they show low engagement "
+    "in at least **2 of 4 behaviors** (Discussion, Raised Hands, Visited Resources, "
+    "Announcements View), **and** have **more than 7 absences** and are in the **Low (L) performance class**."
+)
