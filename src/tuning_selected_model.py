@@ -11,8 +11,11 @@ print("📁 Working directory:", os.getcwd())
 # ✅ Load dataset
 df_processed = pd.read_csv("data/processed_dataset.csv")
 
-# ✅ Separate features and target
-X = df_processed.drop(['Class', 'ID'], axis=1)
+# === Define the features to include (behavioral only) ===
+features_to_include = ['VisITedResources', 'raisedhands', 'AnnouncementsView', 'StudentAbsenceDays', 'Discussion']
+
+# === Separate features and target ===
+X = df_processed[features_to_include]
 y = df_processed['Class']
 
 # ✅ Split the data
