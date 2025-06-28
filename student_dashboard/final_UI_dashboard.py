@@ -459,7 +459,6 @@ with st.container():
         )
         fig_line.update_traces(marker=dict(size=8), line=dict(width=3))
         fig_line.update_layout(
-            title=None,  # ✅ Remove chart title
             xaxis_title=None,  # ✅ Remove x-axis title
             yaxis_title=None   # ✅ Remove y-axis title
         )
