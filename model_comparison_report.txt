@@ -2,44 +2,44 @@ Model Comparison Report (test_size=0.2)
 ==================================================
 
 Random Forest
-Accuracy: 0.8438
+Accuracy: 0.8021
 
 Classification Report:
               precision    recall  f1-score   support
 
-           H       0.80      0.73      0.76        22
-           L       0.89      0.92      0.91        26
-           M       0.84      0.85      0.85        48
+           0       0.86      0.92      0.89        26
+           1       0.81      0.79      0.80        48
+           2       0.71      0.68      0.70        22
 
-    accuracy                           0.84        96
-   macro avg       0.84      0.83      0.84        96
-weighted avg       0.84      0.84      0.84        96
+    accuracy                           0.80        96
+   macro avg       0.79      0.80      0.80        96
+weighted avg       0.80      0.80      0.80        96
 
 Confusion Matrix:
-[[16  0  6]
- [ 0 24  2]
- [ 4  3 41]]
+[[24  2  0]
+ [ 4 38  6]
+ [ 0  7 15]]
 
 --------------------------------------------------
 
 Support Vector Machine (SVC)
-Accuracy: 0.8333
+Accuracy: 0.7812
 
 Classification Report:
               precision    recall  f1-score   support
 
-           H       0.84      0.73      0.78        22
-           L       0.81      0.96      0.88        26
-           M       0.85      0.81      0.83        48
+           0       0.77      0.92      0.84        26
+           1       0.81      0.73      0.77        48
+           2       0.73      0.73      0.73        22
 
-    accuracy                           0.83        96
-   macro avg       0.83      0.83      0.83        96
-weighted avg       0.84      0.83      0.83        96
+    accuracy                           0.78        96
+   macro avg       0.77      0.79      0.78        96
+weighted avg       0.78      0.78      0.78        96
 
 Confusion Matrix:
-[[16  0  6]
- [ 0 25  1]
- [ 3  6 39]]
+[[24  2  0]
+ [ 7 35  6]
+ [ 0  6 16]]
 
 --------------------------------------------------
 
@@ -49,24 +49,24 @@ Accuracy: 0.7188
 Classification Report:
               precision    recall  f1-score   support
 
-           H       0.62      0.59      0.60        22
-           L       0.71      0.96      0.82        26
-           M       0.78      0.65      0.70        48
+           0       0.77      0.92      0.84        26
+           1       0.74      0.67      0.70        48
+           2       0.59      0.59      0.59        22
 
     accuracy                           0.72        96
    macro avg       0.70      0.73      0.71        96
-weighted avg       0.72      0.72      0.71        96
+weighted avg       0.72      0.72      0.72        96
 
 Confusion Matrix:
-[[13  0  9]
- [ 1 25  0]
- [ 7 10 31]]
+[[24  2  0]
+ [ 7 32  9]
+ [ 0  9 13]]
 
 --------------------------------------------------
 
 Accuracy Summary Table:
 Classifier                            Accuracy
 --------------------------------------------------
-Random Forest                           0.8438
-Support Vector Machine (SVC)            0.8333
+Random Forest                           0.8021
+Support Vector Machine (SVC)            0.7812
 K-Nearest Neighbors                     0.7188
