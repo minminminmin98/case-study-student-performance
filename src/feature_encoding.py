@@ -46,7 +46,8 @@ def encode_student_data(input_path="data/student_dataset.csv", output_path="data
         'Relation': {'Father': 0, 'Mum': 1},
         'ParentAnsweringSurvey': {'No': 0, 'Yes': 1},
         'ParentschoolSatisfaction': {'Bad': 0, 'Good': 1},
-        'StudentAbsenceDays': {'Under-7': 0, 'Above-7': 1}
+        'StudentAbsenceDays': {'Under-7': 0, 'Above-7': 1},
+        'Class': {'L': 0, 'M': 1, 'H': 2}  # ✅ Added missing comma above
     }
 
     # Apply mappings
