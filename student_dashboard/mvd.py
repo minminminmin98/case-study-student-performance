@@ -72,13 +72,15 @@ col3.metric("👧 Female Students", filtered_df[filtered_df['gender'] == 'F'].sh
 # --- Layout ---
 with st.container():
     # Add spacing column in between
-    row1_col1, spacer, row1_col2 = st.columns([1.0, 0.1, 1.5])
+    row1_col1, spacer, row1_col2 = st.columns([1.1, 0.1, 1.5])
 
     # --- Left: Performance Level Distribution ---
     with row1_col1:
         st.subheader("📈 Performance Level Distribution")
 
-        performance_order = ['H', 'M', 'L']
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        performance_order = ['L', 'M', 'H']
         class_counts = (
             filtered_df['Class']
             .value_counts()
@@ -104,7 +106,7 @@ with st.container():
                              ha='center', va='center',
                              fontsize=11, color='white')
 
-        ax2.set_xlabel("Performance Level")
+        ax2.set_xlabel("")
         ax2.set_ylabel("")
         ax2.set_yticks([])
 
