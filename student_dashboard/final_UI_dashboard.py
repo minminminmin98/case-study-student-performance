@@ -36,7 +36,6 @@ model = load_model()
 st.title("📊 Student Academic Performance Dashboard")
 
 # ------------------------------- Sidebar: Filter and Predict
-# ------------------------------- Sidebar: Filter and Predict
 with st.sidebar:
     # ---------- Extract Options
     grade_options = sorted(df['GradeID'].dropna().unique())
@@ -138,63 +137,128 @@ with st.sidebar:
                 st.success("✅ Not At-Risk")
 
 
-# ------------------------------- Metric Cards
+# ------------------------------- 🎓 Metric Cards Section -------------------------------
+
+# Calculate metrics
+total_students = len(filtered_df)
+total_male = (filtered_df['gender'] == 'M').sum()
+total_female = (filtered_df['gender'] == 'F').sum()
+at_risk_pct = round((filtered_df['Class'] == 'L').mean() * 100, 2)
+most_challenging_subject = filtered_df[filtered_df['Class'] == 'L']['Topic'].value_counts().idxmax()
+
+# Minimal, professional style
+st.markdown("""
+    <style>
+        .metric-box {
+            background-color: #f5f7fa;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            height: 140px;
+            color: #333333;
+            font-family: "Segoe UI", sans-serif;
+        }
+        .metric-label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555555;
+        }
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #222222;
+        }
+        .metric-sub {
+            font-size: 13px;
+            color: #777777;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Layout with 3 columns
 col1, col2, col3 = st.columns(3)
 
-col1.metric("🎓 Total Students", filtered_df.shape[0])
-col2.metric("👦 Male Students", filtered_df[filtered_df['gender'] == 'M'].shape[0])
-col3.metric("👧 Female Students", filtered_df[filtered_df['gender'] == 'F'].shape[0])
+with col1:
+    st.markdown(f"""
+        <div class="metric-box">
+            <div class="metric-label">🎯 Total Students</div>
+            <div class="metric-value">{total_students}</div>
+            <div class="metric-sub">M: {total_male} | F: {total_female}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown(f"""
+        <div class="metric-box">
+            <div class="metric-label">🚨 At-Risk Students</div>
+            <div class="metric-value">{at_risk_pct}%</div>
+            <div class="metric-sub">Based on 'L' in Class</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown(f"""
+        <div class="metric-box">
+            <div class="metric-label">📘 Most Challenging Subject</div>
+            <div class="metric-value">{most_challenging_subject}</div>
+            <div class="metric-sub">Among At-Risk Students</div>
+        </div>
+    """, unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
 
 # ------------------------------- Charts Row 1
-# --- Layout ---
 with st.container():
     # Add spacing column in between
-    row1_col1, spacer, row1_col2 = st.columns([1.1, 0.1, 1.5])
+    row1_col1, spacer, row1_col2 = st.columns([1, 0.25, 1.4])
 
     # --- Left: Performance Level Distribution ---
     with row1_col1:
-        st.subheader("📈 Performance Level Distribution")
+        st.markdown("##### 📈 Performance Level Distribution")
 
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Map and prepare class labels
+        class_label_map = {'H': '<b>High</b>', 'M': '<b>Medium</b>', 'L': '<b>Low</b>'}
+        class_series = filtered_df['Class'].map(class_label_map)
+        class_counts = class_series.value_counts().reset_index()
+        class_counts.columns = ['Class', 'Count']  # ✅ Ensure unique column names
 
-        performance_order = ['L', 'M', 'H']
-        class_counts = (
-            filtered_df['Class']
-            .value_counts()
-            .reindex(performance_order)
-            .fillna(0)
-            .astype(int)
+        # palette
+        color_map = {
+            '<b>High</b>': '#1f77b4',   
+            '<b>Medium</b>': '#eca532', 
+            '<b>Low</b>': '#8B0000'     
+        }
+
+        fig_donut = px.pie(
+            class_counts,
+            names='Class',
+            values='Count',
+            hole=0.4,
+            color='Class',
+            color_discrete_map=color_map
         )
 
-        fig2, ax2 = plt.subplots(figsize=(6, 3.5))
-        bars = sns.barplot(
-            x=class_counts.index,
-            y=class_counts.values,
-            ax=ax2,
-            order=performance_order,
-            palette='Blues_d'
+        fig_donut.update_traces(
+            textposition='inside',
+            textinfo='label+percent+value',
+            textfont=dict(size=13),
+            marker=dict(line=dict(color='#FFFFFF', width=1))
         )
 
-        for bar in bars.patches:
-            height = bar.get_height()
-            if height > 0:
-                ax2.annotate(f'{int(height)}',
-                             xy=(bar.get_x() + bar.get_width() / 2, height / 2),
-                             ha='center', va='center',
-                             fontsize=11, color='white')
+        fig_donut.update_layout(
+            showlegend=True,
+            legend_title_text='Performance Level',
+            font=dict(family="Segoe UI", size=12),
+            margin=dict(t=20, b=0, l=0, r=0)
+        )
 
-        ax2.set_xlabel("")
-        ax2.set_ylabel("")
-        ax2.set_yticks([])
-
-        if class_counts.sum() > 0:
-            ax2.set_ylim(0, max(class_counts.values) * 1.2)
-
-        st.pyplot(fig2)
+        st.plotly_chart(fig_donut, use_container_width=True)
 
     # --- Right: Student Nationality Map ---
     with row1_col2:
-        st.subheader("🗺️ Student Nationality Map")
+        st.markdown("##### 🗺️ Student Nationality Map")
 
         country_name_map = {
             'USA': 'United States of America',
@@ -258,7 +322,7 @@ with st.container():
             hover_name='country',
             hover_data={'students': True, 'percentage': True},
             projection='natural earth',
-            height=350
+            height=450
         )
 
         # ✅ Display country names only when zoomed (≤ 3 countries shown)
@@ -312,34 +376,76 @@ with st.container():
 
 st.markdown("""
 <div style='
-    margin-top: 60px;
-    margin-bottom: 50px;
-    padding: 1.5rem;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #e0f7fa, #ffffff);
+    margin-top: 40px;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #f5f7fa;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     text-align: center;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    font-size: 1.7rem;
+    color: #333333;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 26px;
     font-weight: 700;
-    color: #006064;
-    letter-spacing: 0.5px;
 '>
-📊 High-Level Trends in Student Performance
+📊 In-Depth Student Performance Analytics
 </div>
 """, unsafe_allow_html=True)
 
 
-# --- Define AtRisk (Low class students)
-filtered_df['AtRisk'] = filtered_df['Class'] == 'L'
+# Define consistent color mapping
+class_color_map = {'H': '#1f77b4', 'M': "#eca532", 'L': "#8B0000"}
+class_order = ['H', 'M', 'L']  # For sorting legends
 
-# --- Charts Row 1
+# Row 1: Gender vs Performance (Stacked Bar) and At-Risk Heatmap
 with st.container():
-    col1, col2 = st.columns(2)
+    row1_col1, spacer1, row1_col2 = st.columns([1, 0.2, 1])
 
-    with col1:
-        st.markdown("#### 📈 Engagement Behavior by Performance")
+    # --- Chart 1: Stacked Bar - Gender vs Performance ---
+    with row1_col1:
+        st.markdown("##### 👩‍🎓 Performance Distribution by Gender")
+        st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+        gender_perf = filtered_df.groupby(['gender', 'Class']).size().reset_index(name='Count')
+        gender_perf['Class'] = pd.Categorical(gender_perf['Class'], categories=class_order, ordered=True)
+        gender_perf = gender_perf.sort_values(by='Class')
+
+        fig_gender = px.bar(
+            gender_perf, x='gender', y='Count', color='Class', barmode='stack',
+            color_discrete_map=class_color_map, category_orders={'Class': class_order}
+        )
+        fig_gender.update_layout(xaxis_title=None, yaxis_title=None)  # ✅ Remove axis titles
+        st.plotly_chart(fig_gender, use_container_width=True)
+
+
+    # --- Chart 2: Heatmap - At-Risk by Grade & Section ---
+    with row1_col2:
+        st.markdown("##### 🔥 At-Risk Heatmap by Grade and Section")
+        st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+        filtered_df['AtRisk'] = filtered_df['Class'] == 'L'
+        risk_heatmap = pd.crosstab(
+            filtered_df['GradeID'],
+            filtered_df['SectionID'],
+            filtered_df['AtRisk'],
+            aggfunc='sum'
+        ).fillna(0)
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.heatmap(risk_heatmap, annot=True, fmt='.0f', cmap='YlOrRd', ax=ax)
+        st.pyplot(fig)
+
+st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+
+# Row 2: Line Chart (Engagement) and Grouped Bar (Subject)
+with st.container():
+    row2_col1, spacer2, row2_col2 = st.columns([1, 0.2, 1])
+
+    # --- Chart 3: Line Chart - Engagement Behavior by Performance ---
+    with row2_col1:
+        st.markdown("##### 📈 Average Engagement Behavior by Performance")
+        st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
         engagement_cols = ['VisITedResources', 'raisedhands', 'AnnouncementsView', 'Discussion']
         engagement_avg = filtered_df.groupby('Class')[engagement_cols].mean().reset_index()
+        engagement_avg['Class'] = pd.Categorical(engagement_avg['Class'], categories=class_order, ordered=True)
         engagement_avg_melted = engagement_avg.melt(id_vars='Class', var_name='Behavior', value_name='AvgScore')
 
         fig_line = px.line(
@@ -348,109 +454,40 @@ with st.container():
             y='AvgScore',
             color='Class',
             markers=True,
-            line_dash='Class',
-            title='Average Engagement Score by Behavior and Performance Level',
-            color_discrete_map={'L': '#e74c3c', 'M': '#f39c12', 'H': '#27ae60'}
+            color_discrete_map=class_color_map,
+            category_orders={'Class': class_order}
         )
+        fig_line.update_traces(marker=dict(size=8), line=dict(width=3))
         fig_line.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(size=14),
-            legend_title_text='Performance Class',
-            title_x=0.1
+            title=None,  # ✅ Remove chart title
+            xaxis_title=None,  # ✅ Remove x-axis title
+            yaxis_title=None   # ✅ Remove y-axis title
         )
-        fig_line.update_traces(marker=dict(size=10), line=dict(width=3))
         st.plotly_chart(fig_line, use_container_width=True)
 
-    with col2:
-        st.markdown("#### 📚 Subject-wise Performance Breakdown (Treemap)")
-        subject_perf = (
-            filtered_df.groupby(['Topic', 'Class'])
-            .size()
-            .reset_index(name='Count')
-        )
-        fig_treemap = px.treemap(
+    # --- Chart 4: Grouped Bar - Subject-wise Performance ---
+    with row2_col2:
+        st.markdown("##### 📚 Subject-wise Performance Breakdown")
+        st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+        subject_perf = filtered_df.groupby(['Topic', 'Class']).size().reset_index(name='Count')
+        subject_perf['Class'] = pd.Categorical(subject_perf['Class'], categories=class_order, ordered=True)
+        subject_perf = subject_perf.sort_values(by=['Topic', 'Class'])
+
+        fig_subject = px.bar(
             subject_perf,
-            path=['Class', 'Topic'],
-            values='Count',
-            color='Class',
-            color_discrete_map={'L': '#d9534f', 'M': '#f0ad4e', 'H': '#5cb85c'},
-            title="Performance Distribution by Subject and Level"
-        )
-        st.plotly_chart(fig_treemap, use_container_width=True)
-
-# --- Charts Row 2
-with st.container():
-    col3, col4 = st.columns(2)
-
-    with col3:
-        st.markdown("#### 🧑‍🤝‍🧑 Gender vs. Performance (Stacked Bar)")
-        gender_perf = filtered_df.groupby(['gender', 'Class']).size().reset_index(name='Count')
-        fig_gender = px.bar(
-            gender_perf,
-            x='gender',
+            x='Topic',
             y='Count',
             color='Class',
-            barmode='stack',
-            labels={'gender': 'Gender'},
-            title="Student Performance by Gender",
-            color_discrete_map={'L': '#d9534f', 'M': '#f0ad4e', 'H': '#5cb85c'}
+            barmode='group',
+            color_discrete_map=class_color_map,
+            category_orders={'Class': class_order}
         )
-        st.plotly_chart(fig_gender, use_container_width=True)
-
-    with col4:
-        st.markdown("#### 🌎 Performance Heatmap by Nationality")
-        perf_map = {'L': 1, 'M': 2, 'H': 3}
-        filtered_df['PerfScore'] = filtered_df['Class'].map(perf_map)
-        avg_perf_nationality = filtered_df.groupby('NationalITy')['PerfScore'].mean().reset_index()
-        avg_perf_nationality['PerfScore'] = avg_perf_nationality['PerfScore'].round(2)
-        avg_perf_nationality = avg_perf_nationality.sort_values('PerfScore', ascending=False)
-
-        fig_heat = px.density_heatmap(
-            avg_perf_nationality,
-            x='NationalITy',
-            y='PerfScore',
-            z='PerfScore',
-            color_continuous_scale='Blues',
-            title="Average Performance Score by Country"
+        fig_subject.update_layout(
+            xaxis_title=None,  # ✅ Remove x-axis title
+            yaxis_title=None   # ✅ Remove y-axis title
         )
-        fig_heat.update_xaxes(tickangle=45)
-        st.plotly_chart(fig_heat, use_container_width=True)
+        st.plotly_chart(fig_subject, use_container_width=True)
 
-# --- Charts Row 3
-with st.container():
-    col5, col6 = st.columns(2)
-
-    with col5:
-        st.markdown("#### 📈 Engagement Behavior by Performance (Line)")
-        engagement_cols = ['VisITedResources', 'raisedhands', 'AnnouncementsView', 'Discussion']
-        engagement_avg = filtered_df.groupby('Class')[engagement_cols].mean().reset_index()
-        engagement_avg_melted = engagement_avg.melt(id_vars='Class', var_name='Behavior', value_name='AvgScore')
-
-        fig_engage = px.line(
-            engagement_avg_melted,
-            x='Behavior',
-            y='AvgScore',
-            color='Class',
-            markers=True,
-            line_dash='Class',
-            color_discrete_map={'L': '#d9534f', 'M': '#f0ad4e', 'H': '#5cb85c'},
-            title="Average Student Engagement by Performance Level"
-        )
-        st.plotly_chart(fig_engage, use_container_width=True)
-
-    with col6:
-        st.markdown("#### 🏷️ Class Composition by Nationality (Sunburst)")
-        nationality_class = filtered_df.groupby(['NationalITy', 'Class']).size().reset_index(name='Count')
-        fig_sunburst = px.sunburst(
-            nationality_class,
-            path=['NationalITy', 'Class'],
-            values='Count',
-            color='Class',
-            color_discrete_map={'L': '#d9534f', 'M': '#f0ad4e', 'H': '#5cb85c'},
-            title="Nationality-wise Class Composition"
-        )
-        st.plotly_chart(fig_sunburst, use_container_width=True)
 
 # ------------------------------- At-Risk Student Detection
 st.markdown("<br><hr style='border-top: 1px solid lightgray;'/><br>", unsafe_allow_html=True)
