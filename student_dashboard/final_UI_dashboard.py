@@ -144,7 +144,12 @@ total_students = len(filtered_df)
 total_male = (filtered_df['gender'] == 'M').sum()
 total_female = (filtered_df['gender'] == 'F').sum()
 at_risk_pct = round((filtered_df['Class'] == 'L').mean() * 100, 2)
-most_challenging_subject = filtered_df[filtered_df['Class'] == 'L']['Topic'].value_counts().idxmax()
+low_perf_topics = filtered_df[filtered_df['Class'] == 'L']['Topic'].dropna()
+
+if not low_perf_topics.empty:
+    most_challenging_subject = low_perf_topics.value_counts().idxmax()
+else:
+    most_challenging_subject = "N/A"
 
 # Minimal, professional style
 st.markdown("""
