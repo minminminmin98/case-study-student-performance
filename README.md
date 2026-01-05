@@ -1,11 +1,14 @@
 ## 🌟 Case Study Overview
 Turning raw student data into actionable insights is challenging for educators and policymakers. This project focused on creating an **interactive dashboard** that:
-
 - Explores student performance trends
 - Predicts performance levels to identify at-risk students
 - Supports data-driven decisions for teachers, administrators, and policymakers
-
 The project followed **Agile methodology**, delivering improvements across **three sprints** using **Python and GitHub**.
+
+---
+
+## 📂 Dataset
+The project uses the **Students’ Academic Performance Dataset (xAPI‑Edu‑Data, OpenML ID: 43415)**, which contains **480 student records with 16 demographic, academic, and engagement features** for predicting performance levels (Low, Middle, High). Features include gender, grade level, classroom activity, parent involvement, and attendance. The dataset has no missing values and is suitable for classification tasks. Explore it here: [OpenML Dataset](https://www.openml.org/search?type=data&sort=version&status=any&order=asc&exact_name=Students-Academic-Performance-Dataset&id=43415).
 
 ---
 
