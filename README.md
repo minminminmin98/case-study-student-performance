@@ -18,6 +18,6 @@ The project followed **Agile methodology**, delivering improvements across **thr
 ---
 
 ## 📊 Dashboards
-- **MVD** - https://minminminmin98-case-study-student-dashboardmvd-dashboardrzjomh.streamlit.app/ 
-- **Predictive Model** - https://minminminmin98-cas-student-dashboardpredictivedashboard-yoma3b.streamlit.app/  
-- **Final UI** - https://minminminmin98-case--student-dashboardfinal-ui-dashboard4idous.streamlit.app/
+- **MVD** - https://minminminmin98-case-study-student-dashboardmvd-dashboard-rzjomh.streamlit.app/ 
+- **Predictive Model** - https://minminminmin98-cas-student-dashboardpredictive-dashboard-yoma3b.streamlit.app/  
+- **Final UI** - https://minminminmin98-case--student-dashboardfinal-ui-dashboard-4idous.streamlit.app/
